@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.RecyclerView
 import com.delaroystudios.movieapp.BuildConfig
 import com.delaroystudios.movieapp.R
 import com.delaroystudios.movieapp.data.model.Movie
@@ -23,17 +25,26 @@ class MainActivity: AppCompatActivity(), RecyclerViewHomeClickListener {
     private val homeViewModel: HomeViewModel by viewModels()
     private val homeAdapter: HomeAdpater by lazy { HomeAdpater(this, this@MainActivity) }
 
+    var totalPages = 0
+    var counter = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding.run {
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)//  set status text dark
-
-            getWindow().setStatusBarColor(ContextCompat.getColor(applicationContext,R.color.white))// set status background white
-
            recyclerView.apply {
                adapter = homeAdapter
+               addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                   override fun onScrolled(@NonNull recyclerView: RecyclerView, dx: Int, dy: Int) {
+                       super.onScrolled(recyclerView, dx, dy)
+                       if (!recyclerView.canScrollVertically(1)) { //1 for down
+                           if(counter <= totalPages){
+                               homeViewModel.fetchPopular(BuildConfig.MOVIE_DB_API_TOKEN)
+                               ++counter
+                           }
+                       }
+                   }
+               })
            }
         }
 
@@ -46,7 +57,9 @@ class MainActivity: AppCompatActivity(), RecyclerViewHomeClickListener {
             when (it) {
                 is Resource.Success -> {
                     binding.progress.visibility = View.GONE
-                    val data = it.data!!.movies
+                    val value = it.data!!
+                    totalPages = value.totalPages
+                    val data = value.movies
                     homeAdapter.submitList(data!!)
                 }
                 is Resource.Error -> {
