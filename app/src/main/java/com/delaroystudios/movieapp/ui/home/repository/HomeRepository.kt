@@ -18,4 +18,10 @@ class HomeRepository @Inject constructor(
         val popular = movieAppService.getPopularMovies(apikey, page)
         popular
     }
+
+    suspend fun fetchTopRated(apikey: String, page: Int? = null): Response<MoviesResponse> = withContext(
+        Dispatchers.IO) {
+        val top = movieAppService.getTopRatedMovies(apikey, page)
+        top
+    }
 }

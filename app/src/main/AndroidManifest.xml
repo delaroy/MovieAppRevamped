@@ -15,10 +15,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MovieAppRevamped">
         <activity
-            android:name=".ui.home.MainActivity"
+            android:name=".ui.MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.MovieAppRevamped.NoActionBar">
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

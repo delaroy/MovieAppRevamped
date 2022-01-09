@@ -1,0 +1,15 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.delaroystudios.movieapp.MainActivity">
+    <item
+        android:id="@+id/popular"
+        android:orderInCategory="100"
+        android:title="@string/popular"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/most_rated"
+        android:orderInCategory="100"
+        android:title="@string/most_rated"
+        app:showAsAction="never" />
+</menu>

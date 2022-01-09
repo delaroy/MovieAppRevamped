@@ -26,6 +26,10 @@ class HomeViewModel @Inject constructor(
     var movieListResponse: MoviesResponse? = null
     var moviePage = 1
 
+    val movieTop: MutableLiveData<Resource<MoviesResponse>> = MutableLiveData()
+    var movieTopListResponse: MoviesResponse? = null
+    var movieTopPage = 1
+
     /*fun fetchPopular(apikey: String){
         moviePopular.postValue(Resource.Loading())
         viewModelScope.launch {
@@ -79,6 +83,45 @@ class HomeViewModel @Inject constructor(
                     oldMovies!!.addAll(newMovies!!)
                 }
                 return Resource.Success(movieListResponse ?: resultResponse)
+            }
+        }
+        return Resource.Error(response.message())
+    }
+
+    fun fetchTopMovies(apikey: String) = viewModelScope.launch {
+        safeTopMovieCall(apikey, movieTopPage)
+    }
+
+    private suspend fun safeTopMovieCall(apikey: String, page: Int){
+        moviePopular.postValue(Resource.Loading())
+        try{
+            if(hasInternetConnection(context)){
+                val response = homeRepository.fetchTopRated(apikey, page)
+                moviePopular.postValue(handleTopOrderResponse(response))
+            }
+            else
+                moviePopular.postValue(Resource.Error("No Internet Connection"))
+        }
+        catch (ex: Exception){
+            when(ex){
+                is IOException -> moviePopular.postValue(Resource.Error("Network Failure"))
+                else -> moviePopular.postValue(Resource.Error("Conversion Error"))
+            }
+        }
+    }
+
+    private fun handleTopOrderResponse(response: Response<MoviesResponse>): Resource<MoviesResponse> {
+        if (response.isSuccessful) {
+            response.body()?.let { resultResponse ->
+                movieTopPage++
+                if (movieTopListResponse == null)
+                    movieTopListResponse = resultResponse
+                else {
+                    val oldMovies = movieTopListResponse!!.movies as ArrayList<Movie>?
+                    val newMovies = resultResponse.movies!! as ArrayList<Movie>?
+                    oldMovies!!.addAll(newMovies!!)
+                }
+                return Resource.Success(movieTopListResponse ?: resultResponse)
             }
         }
         return Resource.Error(response.message())
